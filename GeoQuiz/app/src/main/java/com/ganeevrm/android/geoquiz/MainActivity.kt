@@ -17,12 +17,12 @@ class MainActivity : AppCompatActivity() {
     private lateinit var questionTextView: TextView
 
     private val questionBank = listOf(
-        Question(R.string.question_australia, true),
-        Question(R.string.question_oceans, true),
-        Question(R.string.question_mideast, false),
-        Question(R.string.question_africa, false),
-        Question(R.string.question_americas, true),
-        Question(R.string.question_asia, true)
+        Question(R.string.question_australia, true, null),
+        Question(R.string.question_oceans, true, null),
+        Question(R.string.question_mideast, false, null),
+        Question(R.string.question_africa, false, null),
+        Question(R.string.question_americas, true, null),
+        Question(R.string.question_asia, true, null)
     )
 
     private var currentIndex = 0
@@ -40,21 +40,25 @@ class MainActivity : AppCompatActivity() {
 
         trueButton.setOnClickListener {
             checkAnswer(true)
+            updateQuestion()
         }
 
         falseButton.setOnClickListener {
             checkAnswer(false)
+            updateQuestion()
         }
 
         nextButton.setOnClickListener {
             currentIndex = (currentIndex + 1) % questionBank.size
             updateQuestion()
+            checkResult()
         }
 
         prevButton.setOnClickListener{
             val diff = currentIndex - 1
             currentIndex = if (diff == -1) questionBank.size-1 else diff % questionBank.size
             updateQuestion()
+            checkResult()
         }
 
         updateQuestion()
@@ -83,6 +87,13 @@ class MainActivity : AppCompatActivity() {
     private fun updateQuestion(){
         val questionTextResId = questionBank[currentIndex].textResId
         questionTextView.setText(questionTextResId)
+        if(questionBank[currentIndex].userAnswer!=null){
+            trueButton.isEnabled = false
+            falseButton.isEnabled = false
+        } else {
+            trueButton.isEnabled = true
+            falseButton.isEnabled = true
+        }
     }
 
     private fun checkAnswer(userAnswer: Boolean){
@@ -92,6 +103,27 @@ class MainActivity : AppCompatActivity() {
         } else {
             R.string.incorrect_toast
         }
+        questionBank[currentIndex].userAnswer = userAnswer
         Toast.makeText(this, messageResId, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun checkResult(){
+        var valueAnswer = 0
+        for(question in questionBank){
+            if (question.userAnswer!=null){
+                valueAnswer++
+            }
+        }
+        if(questionBank.size == valueAnswer){
+            valueAnswer = 0
+            for(question in questionBank){
+                if (question.answer==question.userAnswer){
+                    valueAnswer++
+                }
+            }
+
+            val valueMean = (valueAnswer.toDouble() / questionBank.size) * 100
+            Toast.makeText(this,getString(R.string.result_toast) + valueMean.toInt() + "%", Toast.LENGTH_LONG).show()
+        }
     }
 }

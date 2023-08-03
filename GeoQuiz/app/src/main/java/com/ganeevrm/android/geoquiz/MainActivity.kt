@@ -7,30 +7,27 @@ import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 
 private const val TAG = "MainActivity"
+private const val KEY_INDEX = "index"
 class MainActivity : AppCompatActivity() {
     private lateinit var trueButton: Button
     private lateinit var falseButton: Button
     private lateinit var nextButton: ImageButton
     private lateinit var prevButton: ImageButton
     private lateinit var questionTextView: TextView
-
-    private val questionBank = listOf(
-        Question(R.string.question_australia, true, null),
-        Question(R.string.question_oceans, true, null),
-        Question(R.string.question_mideast, false, null),
-        Question(R.string.question_africa, false, null),
-        Question(R.string.question_americas, true, null),
-        Question(R.string.question_asia, true, null)
-    )
-
-    private var currentIndex = 0
+    private val quizViewModel: QuizViewModel by lazy {
+        ViewModelProvider(this).get(QuizViewModel::class.java)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d(TAG, "onCreate")
         setContentView(R.layout.activity_main)
+
+        val currentIndex = savedInstanceState?.getInt(KEY_INDEX, 0) ?: 0
+        quizViewModel.currentIndex = currentIndex
 
         trueButton = findViewById(R.id.true_button)
         falseButton = findViewById(R.id.false_button)
@@ -49,14 +46,13 @@ class MainActivity : AppCompatActivity() {
         }
 
         nextButton.setOnClickListener {
-            currentIndex = (currentIndex + 1) % questionBank.size
+            quizViewModel.moveToNext()
             updateQuestion()
             checkResult()
         }
 
         prevButton.setOnClickListener{
-            val diff = currentIndex - 1
-            currentIndex = if (diff == -1) questionBank.size-1 else diff % questionBank.size
+            quizViewModel.moveToPrevious()
             updateQuestion()
             checkResult()
         }
@@ -79,15 +75,22 @@ class MainActivity : AppCompatActivity() {
         Log.d(TAG, "onStop")
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        Log.d(TAG, "onSaveInstanceState")
+        outState.putInt(KEY_INDEX, quizViewModel.currentIndex)
+
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         Log.d(TAG, "onDestroy")
     }
 
     private fun updateQuestion(){
-        val questionTextResId = questionBank[currentIndex].textResId
+        val questionTextResId = quizViewModel.currentQuestionText
         questionTextView.setText(questionTextResId)
-        if(questionBank[currentIndex].userAnswer!=null){
+        if(quizViewModel.currentQuestionUserAnswer!=null){
             trueButton.isEnabled = false
             falseButton.isEnabled = false
         } else {
@@ -97,33 +100,20 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun checkAnswer(userAnswer: Boolean){
-        val correctAnswer = questionBank[currentIndex].answer
+        val correctAnswer = quizViewModel.currentQuestionAnswer
         val messageResId = if (userAnswer == correctAnswer) {
             R.string.correct_toast
         } else {
             R.string.incorrect_toast
         }
-        questionBank[currentIndex].userAnswer = userAnswer
+        quizViewModel.currentQuestion.userAnswer = userAnswer
         Toast.makeText(this, messageResId, Toast.LENGTH_SHORT).show()
     }
 
     private fun checkResult(){
-        var valueAnswer = 0
-        for(question in questionBank){
-            if (question.userAnswer!=null){
-                valueAnswer++
-            }
-        }
-        if(questionBank.size == valueAnswer){
-            valueAnswer = 0
-            for(question in questionBank){
-                if (question.answer==question.userAnswer){
-                    valueAnswer++
-                }
-            }
-
-            val valueMean = (valueAnswer.toDouble() / questionBank.size) * 100
-            Toast.makeText(this,getString(R.string.result_toast) + valueMean.toInt() + "%", Toast.LENGTH_LONG).show()
+        val result = quizViewModel.checkResult()
+        if(result!=null){
+            Toast.makeText(this,getString(R.string.result_toast) + result.toInt() + "%", Toast.LENGTH_LONG).show()
         }
     }
 }

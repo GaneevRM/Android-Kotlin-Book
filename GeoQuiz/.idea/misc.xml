@@ -3,7 +3,9 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/NoteLenovo/AppData/Local/Android/Sdk/platforms/android-32/data/res/layout/activity_list_item.xml" value="0.1" />
         <entry key="..\:/Users/NoteLenovo/Desktop/Courses/Android-Kotlin-Book/GeoQuiz/app/src/main/res/layout/activity_main.xml" value="0.25" />
+        <entry key="..\:/Users/NoteLenovo/Desktop/Courses/Android-Kotlin-Book/GeoQuiz/app/src/main/res/layout/toast_text.xml" value="0.22" />
       </map>
     </option>
   </component>
@@ -12,5 +14,8 @@
   </component>
   <component name="ProjectType">
     <option name="id" value="Android" />
+  </component>
+  <component name="SuppressKotlinCodeStyleNotification">
+    <option name="disableForAll" value="true" />
   </component>
 </project>

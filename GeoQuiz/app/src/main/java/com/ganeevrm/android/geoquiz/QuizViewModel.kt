@@ -17,21 +17,22 @@ class QuizViewModel : ViewModel() {
     }
 
     var currentIndex = 0
-    var isCheater = false
 
     private val questionBank = listOf(
-        Question(R.string.question_australia, true, null),
-        Question(R.string.question_oceans, true, null),
-        Question(R.string.question_mideast, false, null),
-        Question(R.string.question_africa, false, null),
-        Question(R.string.question_americas, true, null),
-        Question(R.string.question_asia, true, null)
+        Question(R.string.question_australia, true, null, false),
+        Question(R.string.question_oceans, true, null, false),
+        Question(R.string.question_mideast, false, null, false),
+        Question(R.string.question_africa, false, null, false),
+        Question(R.string.question_americas, true, null, false),
+        Question(R.string.question_asia, true, null, false)
     )
 
     val currentQuestionAnswer: Boolean
         get() = questionBank[currentIndex].answer
     val currentQuestionUserAnswer: Boolean?
         get() = questionBank[currentIndex].userAnswer
+    val currentQuestionCheatAnswer: Boolean
+        get() = questionBank[currentIndex].cheatAnswer
     val currentQuestionText: Int
         get() = questionBank[currentIndex].textResId
     val currentQuestion: Question

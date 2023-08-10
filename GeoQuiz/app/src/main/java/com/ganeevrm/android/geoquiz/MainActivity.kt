@@ -63,7 +63,7 @@ class MainActivity : AppCompatActivity() {
 
         val resultCheatActivity = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if(it.resultCode == Activity.RESULT_OK){
-                quizViewModel.isCheater = it.data?.getBooleanExtra(EXTRA_ANSWER_SHOWN, false) ?: false
+                quizViewModel.currentQuestion.cheatAnswer = it.data?.getBooleanExtra(EXTRA_ANSWER_SHOWN, false) ?: false
             }
         }
 
@@ -118,7 +118,7 @@ class MainActivity : AppCompatActivity() {
     private fun checkAnswer(userAnswer: Boolean){
         val correctAnswer = quizViewModel.currentQuestionAnswer
         val messageResId = when {
-            quizViewModel.isCheater -> R.string.judgment_toast
+            quizViewModel.currentQuestionCheatAnswer -> R.string.judgment_toast
             userAnswer == correctAnswer -> R.string.correct_toast
             else -> R.string.incorrect_toast
         }

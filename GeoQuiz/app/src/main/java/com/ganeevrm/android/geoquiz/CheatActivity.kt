@@ -3,6 +3,7 @@ package com.ganeevrm.android.geoquiz
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -19,6 +20,7 @@ class CheatActivity : AppCompatActivity() {
 
     private lateinit var answerTextView: TextView
     private lateinit var showAnswerButton: Button
+    private lateinit var apiLevelTextView: TextView
     private val cheatViewModel: CheatViewModel by lazy {
         ViewModelProvider(this).get(CheatViewModel::class.java)
     }
@@ -33,6 +35,7 @@ class CheatActivity : AppCompatActivity() {
         cheatViewModel.isCheater = savedInstanceState?.getBoolean(KEY_IS_CHEATER, false) ?: false
 
         answerTextView = findViewById(R.id.answer_text_view)
+        apiLevelTextView = findViewById(R.id.api_level_text_view)
         showAnswerButton = findViewById(R.id.show_answer_button)
         showAnswerButton.setOnClickListener {
             cheatViewModel.isCheater = true
@@ -69,6 +72,8 @@ class CheatActivity : AppCompatActivity() {
     }
 
     private fun updateInterface(){
+        val apiLevelValue = getString(R.string.api_level) + Build.VERSION.SDK_INT
+        apiLevelTextView.text = apiLevelValue
         if(cheatViewModel.isCheater){
             showAnswerButton.visibility = View.GONE
             val answerText = when {

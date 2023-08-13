@@ -1,6 +1,8 @@
 package com.ganeevrm.android.geoquiz
 
+import android.annotation.SuppressLint
 import android.app.Activity
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
@@ -9,6 +11,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityOptionsCompat
 import androidx.lifecycle.ViewModelProvider
 
 private const val TAG = "MainActivity"
@@ -24,6 +27,7 @@ class MainActivity : AppCompatActivity() {
         ViewModelProvider(this).get(QuizViewModel::class.java)
     }
 
+    @SuppressLint("RestrictedApi")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d(TAG, "onCreate")
@@ -64,13 +68,19 @@ class MainActivity : AppCompatActivity() {
         val resultCheatActivity = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if(it.resultCode == Activity.RESULT_OK){
                 quizViewModel.currentQuestion.cheatAnswer = it.data?.getBooleanExtra(EXTRA_ANSWER_SHOWN, false) ?: false
+                quizViewModel.cheatsAttempts -= 1
             }
         }
 
-        cheatButton.setOnClickListener {
+        cheatButton.setOnClickListener { view ->
             val answerIsTrue = quizViewModel.currentQuestionAnswer
             val intent = CheatActivity.newIntent(this,answerIsTrue)
-            resultCheatActivity.launch(intent)
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+                val options = ActivityOptionsCompat.makeClipRevealAnimation(view, 0, 0, view.width, view.height)
+                resultCheatActivity.launch(intent, options)
+            } else {
+                resultCheatActivity.launch(intent)
+            }
         }
 
         updateQuestion()
@@ -113,6 +123,9 @@ class MainActivity : AppCompatActivity() {
             trueButton.isEnabled = true
             falseButton.isEnabled = true
         }
+        if(quizViewModel.cheatsAttempts==0){
+            cheatButton.isEnabled = false
+        }
     }
 
     private fun checkAnswer(userAnswer: Boolean){
@@ -124,6 +137,10 @@ class MainActivity : AppCompatActivity() {
         }
         quizViewModel.currentQuestion.userAnswer = userAnswer
         Toast.makeText(this, messageResId, Toast.LENGTH_SHORT).show()
+        if(quizViewModel.currentQuestionCheatAnswer){
+            val hintsValue = getString(R.string.hints_info) + quizViewModel.cheatsAttempts
+            Toast.makeText(this, hintsValue, Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun checkResult(){

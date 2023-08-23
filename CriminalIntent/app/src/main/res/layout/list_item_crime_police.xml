@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:padding="8dp">
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="match_parent"
+        android:layout_weight="1"
         android:orientation="vertical"
         android:layout_margin="8dp">
 
@@ -15,20 +17,32 @@
             android:id="@+id/crime_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Crime Title" />
+            android:text="Crime Title"
+            android:textColor="@android:color/black"
+            android:textSize="18sp" />
 
         <TextView
             android:id="@+id/crime_date"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Crime Date" />
+
     </LinearLayout>
 
     <Button
         android:id="@+id/button"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
+        android:layout_weight="1"
         android:text="Сontact the police" />
+
+    <ImageView
+        android:id="@+id/crime_solved"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:layout_weight="1"
+        app:srcCompat="@drawable/ic_solved" />
 
 </LinearLayout>

@@ -13,16 +13,12 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityOptionsCompat
 import androidx.lifecycle.ViewModelProvider
+import com.ganeevrm.android.geoquiz.databinding.ActivityMainBinding
 
 private const val TAG = "MainActivity"
 private const val KEY_INDEX = "index"
 class MainActivity : AppCompatActivity() {
-    private lateinit var trueButton: Button
-    private lateinit var falseButton: Button
-    private lateinit var nextButton: ImageButton
-    private lateinit var prevButton: ImageButton
-    private lateinit var cheatButton: Button
-    private lateinit var questionTextView: TextView
+    private lateinit var binding: ActivityMainBinding
     private val quizViewModel: QuizViewModel by lazy {
         ViewModelProvider(this).get(QuizViewModel::class.java)
     }
@@ -31,35 +27,30 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d(TAG, "onCreate")
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         val currentIndex = savedInstanceState?.getInt(KEY_INDEX, 0) ?: 0
         quizViewModel.currentIndex = currentIndex
 
-        trueButton = findViewById(R.id.true_button)
-        falseButton = findViewById(R.id.false_button)
-        nextButton = findViewById(R.id.next_button)
-        prevButton = findViewById(R.id.prev_button)
-        cheatButton = findViewById(R.id.cheat_button)
-        questionTextView = findViewById(R.id.question_text_view)
 
-        trueButton.setOnClickListener {
+        binding.trueButton.setOnClickListener {
             checkAnswer(true)
             updateQuestion()
         }
 
-        falseButton.setOnClickListener {
+        binding.falseButton.setOnClickListener {
             checkAnswer(false)
             updateQuestion()
         }
 
-        nextButton.setOnClickListener {
+        binding.nextButton.setOnClickListener {
             quizViewModel.moveToNext()
             updateQuestion()
             checkResult()
         }
 
-        prevButton.setOnClickListener{
+        binding.prevButton.setOnClickListener{
             quizViewModel.moveToPrevious()
             updateQuestion()
             checkResult()
@@ -72,7 +63,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        cheatButton.setOnClickListener { view ->
+        binding.cheatButton.setOnClickListener { view ->
             val answerIsTrue = quizViewModel.currentQuestionAnswer
             val intent = CheatActivity.newIntent(this,answerIsTrue)
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
@@ -115,16 +106,18 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateQuestion(){
         val questionTextResId = quizViewModel.currentQuestionText
-        questionTextView.setText(questionTextResId)
-        if(quizViewModel.currentQuestionUserAnswer!=null){
-            trueButton.isEnabled = false
-            falseButton.isEnabled = false
-        } else {
-            trueButton.isEnabled = true
-            falseButton.isEnabled = true
-        }
-        if(quizViewModel.cheatsAttempts==0){
-            cheatButton.isEnabled = false
+        with(binding){
+            questionTextView.setText(questionTextResId)
+            if(quizViewModel.currentQuestionUserAnswer!=null){
+                trueButton.isEnabled = false
+                falseButton.isEnabled = false
+            } else {
+                trueButton.isEnabled = true
+                falseButton.isEnabled = true
+            }
+            if(quizViewModel.cheatsAttempts==0){
+                cheatButton.isEnabled = false
+            }
         }
     }
 

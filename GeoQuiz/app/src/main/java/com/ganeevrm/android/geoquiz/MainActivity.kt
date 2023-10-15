@@ -5,23 +5,17 @@ import android.app.Activity
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.widget.Button
-import android.widget.ImageButton
-import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityOptionsCompat
-import androidx.lifecycle.ViewModelProvider
 import com.ganeevrm.android.geoquiz.databinding.ActivityMainBinding
 
 private const val TAG = "MainActivity"
-private const val KEY_INDEX = "index"
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
-    private val quizViewModel: QuizViewModel by lazy {
-        ViewModelProvider(this).get(QuizViewModel::class.java)
-    }
+    private val quizViewModel: QuizViewModel by viewModels()
 
     @SuppressLint("RestrictedApi")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -29,9 +23,6 @@ class MainActivity : AppCompatActivity() {
         Log.d(TAG, "onCreate")
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        val currentIndex = savedInstanceState?.getInt(KEY_INDEX, 0) ?: 0
-        quizViewModel.currentIndex = currentIndex
 
 
         binding.trueButton.setOnClickListener {
@@ -90,13 +81,6 @@ class MainActivity : AppCompatActivity() {
     override fun onStop() {
         super.onStop()
         Log.d(TAG, "onStop")
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        Log.d(TAG, "onSaveInstanceState")
-        outState.putInt(KEY_INDEX, quizViewModel.currentIndex)
-
     }
 
     override fun onDestroy() {

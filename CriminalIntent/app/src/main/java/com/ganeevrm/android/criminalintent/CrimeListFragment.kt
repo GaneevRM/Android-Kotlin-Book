@@ -6,23 +6,24 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.ganeevrm.android.criminalintent.databinding.FragmentCrimeListBinding
+import com.ganeevrm.android.criminalintent.databinding.ListItemCrimeBinding
 
 private const val TAG = "CrimeListFragment"
 
 class CrimeListFragment : Fragment() {
 
-    private lateinit var crimeRecyclerView: RecyclerView
-    private val crimeListViewModel: CrimeListViewModel by lazy {
-        ViewModelProvider(this).get(CrimeListViewModel::class.java)
-    }
-    private var adapter: CrimeAdapter? = null
+    private var _binding: FragmentCrimeListBinding? = null
+    private val binding
+        get() = checkNotNull(_binding) {
+            "Cannot access binding because it is null. Is the view visible?"
+        }
+    private val crimeListViewModel: CrimeListViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,56 +34,47 @@ class CrimeListFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_crime_list, container, false)
-        crimeRecyclerView = view.findViewById(R.id.crime_recycler_view) as RecyclerView
-        crimeRecyclerView.layoutManager = LinearLayoutManager(context)
-        updateUI()
-        return view
+    ): View {
+        _binding = FragmentCrimeListBinding.inflate(layoutInflater, container, false)
+        binding.crimeRecyclerView.layoutManager = LinearLayoutManager(context)
+
+        val crimes = crimeListViewModel.crimes
+        val adapter = CrimeAdapter(crimes)
+        binding.crimeRecyclerView.adapter = adapter
+
+        return binding.root
     }
 
-    private fun updateUI(){
-        val crimes =  crimeListViewModel.crimes
-        adapter = CrimeAdapter(crimes)
-        crimeRecyclerView.adapter = adapter
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
-    private inner class CrimeHolder(view: View) : RecyclerView.ViewHolder(view), View.OnClickListener {
 
-        private lateinit var crime: Crime
-
-        private val titleTextView: TextView = itemView.findViewById(R.id.crime_title)
-        private val dateTextView: TextView = itemView.findViewById(R.id.crime_date)
-        private val solvedImageView: ImageView = itemView.findViewById(R.id.crime_solved)
-
-        init {
-            itemView.setOnClickListener(this)
-        }
+    class CrimeHolder(val binding: ListItemCrimeBinding) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(crime: Crime) {
-            this.crime = crime
-            titleTextView.text = this.crime.title
-            dateTextView.text = DateFormat.format("EEE, MMM, dd, yyyy", this.crime.date)
-            solvedImageView.visibility = if(this.crime.isSolved){
+            binding.crimeTitle.text = crime.title
+            binding.crimeDate.text = DateFormat.format("EEE, MMM, dd, yyyy", crime.date)
+            binding.crimeSolved.visibility = if (crime.isSolved) {
                 View.VISIBLE
             } else {
                 View.GONE
             }
-        }
 
-        override fun onClick(p0: View?) {
-            Toast.makeText(context, "${crime.title} pressed!", Toast.LENGTH_LONG).show()
+            binding.root.setOnClickListener {
+                Toast.makeText(binding.root.context, "${crime.title} pressed!", Toast.LENGTH_LONG)
+                    .show()
+            }
         }
     }
 
-    private inner class CrimeAdapter(var crimes: List<Crime>) : RecyclerView.Adapter<CrimeHolder>() {
+    class CrimeAdapter(var crimes: List<Crime>) :
+        RecyclerView.Adapter<CrimeHolder>() {
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CrimeHolder {
-            val view = if(viewType==0){
-                layoutInflater.inflate(R.layout.list_item_crime, parent, false)
-            } else {
-                layoutInflater.inflate(R.layout.list_item_crime_police, parent, false)
-            }
-            return CrimeHolder(view)
+            val inflater = LayoutInflater.from(parent.context)
+            val binding = ListItemCrimeBinding.inflate(inflater, parent, false)
+            return CrimeHolder(binding)
         }
 
         override fun getItemCount(): Int {

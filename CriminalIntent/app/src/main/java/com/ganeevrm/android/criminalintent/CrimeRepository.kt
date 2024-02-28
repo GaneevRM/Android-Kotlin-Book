@@ -15,7 +15,7 @@ class CrimeRepository private constructor(context: Context) {
 
     suspend fun getCrimes(): List<Crime> = database.crimeDao().getCrimes()
 
-    suspend fun getCrimes(id: UUID): Crime = database.crimeDao().getCrime(id)
+    suspend fun getCrime(id: UUID): Crime = database.crimeDao().getCrime(id)
 
     companion object {
         private var INSTANCE: CrimeRepository? = null

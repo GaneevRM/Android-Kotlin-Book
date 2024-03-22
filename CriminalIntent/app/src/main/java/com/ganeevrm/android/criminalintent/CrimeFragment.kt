@@ -1,16 +1,20 @@
 package com.ganeevrm.android.criminalintent
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.navArgs
 import com.ganeevrm.android.criminalintent.databinding.FragmentCrimeBinding
 
+private const val TAG = "CrimeFragment"
 class CrimeFragment : Fragment() {
 
     private lateinit var crime: Crime
+    private val args: CrimeFragmentArgs by navArgs()
     private var _binding: FragmentCrimeBinding? = null
     private val binding
         get() = checkNotNull(_binding) {
@@ -20,6 +24,7 @@ class CrimeFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         crime = Crime()
+        Log.d(TAG, "The crime ID is: ${args.crimeId}")
     }
 
     override fun onCreateView(

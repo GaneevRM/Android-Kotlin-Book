@@ -5,17 +5,18 @@ import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ganeevrm.android.criminalintent.databinding.FragmentCrimeListBinding
 import com.ganeevrm.android.criminalintent.databinding.ListItemCrimeBinding
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 
 class CrimeListFragment : Fragment() {
@@ -44,7 +45,9 @@ class CrimeListFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 crimeListViewModel.crimes.collect { crimes ->
-                    binding.crimeRecyclerView.adapter = CrimeAdapter(crimes)
+                    binding.crimeRecyclerView.adapter = CrimeAdapter(crimes) { crimeId ->
+                        findNavController().navigate(CrimeListFragmentDirections.showCrimeDetail(crimeId))
+                    }
                 }
             }
         }
@@ -56,9 +59,9 @@ class CrimeListFragment : Fragment() {
     }
 
 
-    class CrimeHolder(val binding: ListItemCrimeBinding) : RecyclerView.ViewHolder(binding.root) {
+    class CrimeHolder(private val binding: ListItemCrimeBinding) : RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(crime: Crime) {
+        fun bind(crime: Crime, onCrimeClicked:(crimeId: UUID) -> Unit) {
             binding.crimeTitle.text = crime.title
             binding.crimeDate.text = DateFormat.format("EEE, MMM, dd, yyyy", crime.date)
             binding.crimeSolved.visibility = if (crime.isSolved) {
@@ -68,13 +71,12 @@ class CrimeListFragment : Fragment() {
             }
 
             binding.root.setOnClickListener {
-                Toast.makeText(binding.root.context, "${crime.title} pressed!", Toast.LENGTH_LONG)
-                    .show()
+                onCrimeClicked(crime.id)
             }
         }
     }
 
-    class CrimeAdapter(var crimes: List<Crime>) :
+    class CrimeAdapter(private var crimes: List<Crime>, private var onCrimeClicked: (crimeId: UUID) -> Unit) :
         RecyclerView.Adapter<CrimeHolder>() {
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CrimeHolder {
             val inflater = LayoutInflater.from(parent.context)
@@ -88,7 +90,7 @@ class CrimeListFragment : Fragment() {
 
         override fun onBindViewHolder(holder: CrimeHolder, position: Int) {
             val crime = crimes[position]
-            holder.bind(crime)
+            holder.bind(crime, onCrimeClicked)
         }
 
         override fun getItemViewType(position: Int): Int {

@@ -16,7 +16,7 @@
     </fragment>
     <fragment
         android:id="@+id/crimeFragment"
-        android:name="com.ganeevrm.android.criminalintent.CrimeFragment"
+        android:name="com.ganeevrm.android.criminalintent.CrimeDetailFragment"
         android:label="CrimeFragment"
         tools:layout="@layout/fragment_crime">
         <argument

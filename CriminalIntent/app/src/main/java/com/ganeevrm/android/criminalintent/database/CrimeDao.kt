@@ -2,6 +2,7 @@ package com.ganeevrm.android.criminalintent.database
 
 import androidx.room.Dao
 import androidx.room.Query
+import androidx.room.Update
 import com.ganeevrm.android.criminalintent.Crime
 import kotlinx.coroutines.flow.Flow
 import java.util.UUID
@@ -13,4 +14,7 @@ interface CrimeDao {
 
     @Query("SELECT * FROM crime WHERE id=(:id)")
     suspend fun getCrime(id: UUID): Crime
+
+    @Update
+    fun updateCrime(crime: Crime)
 }

@@ -12,15 +12,37 @@
         tools:layout="@layout/fragment_crime_list" >
         <action
             android:id="@+id/show_crime_detail"
-            app:destination="@id/crimeFragment" />
+            app:destination="@id/crimeDetailFragment" />
     </fragment>
     <fragment
-        android:id="@+id/crimeFragment"
+        android:id="@+id/crimeDetailFragment"
         android:name="com.ganeevrm.android.criminalintent.CrimeDetailFragment"
         android:label="CrimeFragment"
         tools:layout="@layout/fragment_crime">
         <argument
             android:name="crimeId"
             app:argType="java.util.UUID" />
+        <action
+            android:id="@+id/select_date"
+            app:destination="@id/datePickerFragment" />
+        <action
+            android:id="@+id/select_time"
+            app:destination="@id/timePickerFragment" />
     </fragment>
+    <dialog
+        android:id="@+id/datePickerFragment"
+        android:name="com.ganeevrm.android.criminalintent.dialog.DatePickerFragment"
+        android:label="DatePickerFragment" >
+        <argument
+            android:name="crimeDate"
+            app:argType="java.util.Date" />
+    </dialog>
+    <dialog
+        android:id="@+id/timePickerFragment"
+        android:name="com.ganeevrm.android.criminalintent.dialog.TimePickerFragment"
+        android:label="TimePickerFragment" >
+        <argument
+            android:name="crimeDate"
+            app:argType="java.util.Date" />
+    </dialog>
 </navigation>

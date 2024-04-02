@@ -8,6 +8,7 @@ import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -15,7 +16,11 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.ganeevrm.android.criminalintent.databinding.FragmentCrimeBinding
+import com.ganeevrm.android.criminalintent.dialog.DatePickerFragment
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class CrimeDetailFragment : Fragment() {
 
@@ -35,7 +40,7 @@ class CrimeDetailFragment : Fragment() {
         super.onCreate(savedInstanceState)
 
         val callback = requireActivity().onBackPressedDispatcher.addCallback(this) {
-            if(binding.crimeTitle.text.isNullOrEmpty()){
+            if (binding.crimeTitle.text.isNullOrEmpty()) {
                 Toast.makeText(context, "Empty Title!", Toast.LENGTH_SHORT).show()
             } else {
                 findNavController().popBackStack()
@@ -62,10 +67,6 @@ class CrimeDetailFragment : Fragment() {
                 }
             }
 
-            crimeDate.apply {
-                isEnabled = false
-            }
-
             crimeSolved.setOnCheckedChangeListener { _, isChecked ->
                 crimeDetailViewModel.updateCrime { oldCrime ->
                     oldCrime.copy(isSolved = isChecked)
@@ -78,6 +79,13 @@ class CrimeDetailFragment : Fragment() {
                 crimeDetailViewModel.crime.collect { crime ->
                     crime?.let { updateUi(it) }
                 }
+            }
+        }
+
+        setFragmentResultListener(DatePickerFragment.REQUEST_KEY_DATE) { _, bundle ->
+            val newDate = bundle.getSerializable(DatePickerFragment.BUNDLE_KEY_DATE) as Date
+            crimeDetailViewModel.updateCrime {
+                it.copy(date = newDate)
             }
         }
     }
@@ -93,6 +101,13 @@ class CrimeDetailFragment : Fragment() {
                 crimeTitle.setText(crime.title)
             }
             crimeDate.text = crime.date.toString()
+            crimeDate.setOnClickListener {
+                findNavController().navigate(CrimeDetailFragmentDirections.selectDate(crime.date))
+            }
+            crimeTime.text = SimpleDateFormat("HH:mm", Locale.getDefault()).format(crime.date)
+            crimeTime.setOnClickListener {
+                findNavController().navigate(CrimeDetailFragmentDirections.selectTime(crime.date))
+            }
             crimeSolved.isChecked = crime.isSolved
         }
     }

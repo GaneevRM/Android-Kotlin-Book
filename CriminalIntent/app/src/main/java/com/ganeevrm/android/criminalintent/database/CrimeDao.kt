@@ -1,6 +1,7 @@
 package com.ganeevrm.android.criminalintent.database
 
 import androidx.room.Dao
+import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
 import com.ganeevrm.android.criminalintent.Crime
@@ -17,4 +18,7 @@ interface CrimeDao {
 
     @Update
     fun updateCrime(crime: Crime)
+
+    @Insert
+    suspend fun addCrime(crime: Crime)
 }

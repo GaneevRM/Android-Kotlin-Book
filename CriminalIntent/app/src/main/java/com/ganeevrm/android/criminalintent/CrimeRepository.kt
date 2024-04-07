@@ -11,11 +11,13 @@ import java.util.UUID
 
 private const val DATABASE_NAME = "crime-database"
 
-class CrimeRepository private constructor(context: Context, private val coroutineScope: CoroutineScope = GlobalScope) {
+class CrimeRepository private constructor(
+    context: Context,
+    private val coroutineScope: CoroutineScope = GlobalScope
+) {
 
     private val database: CrimeDatabase =
         Room.databaseBuilder(context.applicationContext, CrimeDatabase::class.java, DATABASE_NAME)
-            .createFromAsset(DATABASE_NAME)
             .build()
 
     fun getCrimes(): Flow<List<Crime>> = database.crimeDao().getCrimes()
@@ -26,6 +28,10 @@ class CrimeRepository private constructor(context: Context, private val coroutin
         coroutineScope.launch {
             database.crimeDao().updateCrime(crime)
         }
+    }
+
+    suspend fun addCrime(crime: Crime) {
+        database.crimeDao().addCrime(crime)
     }
 
     companion object {

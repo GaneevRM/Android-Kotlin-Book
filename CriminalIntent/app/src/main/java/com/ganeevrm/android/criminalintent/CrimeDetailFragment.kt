@@ -2,10 +2,14 @@ package com.ganeevrm.android.criminalintent
 
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.addCallback
+import androidx.core.view.get
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
@@ -47,6 +51,7 @@ class CrimeDetailFragment : Fragment() {
             }
         }
         callback.isEnabled = true
+        setHasOptionsMenu(true)
     }
 
     override fun onCreateView(
@@ -109,6 +114,33 @@ class CrimeDetailFragment : Fragment() {
                 findNavController().navigate(CrimeDetailFragmentDirections.selectTime(crime.date))
             }
             crimeSolved.isChecked = crime.isSolved
+        }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.fragment_crime_list, menu)
+        menu[0].isVisible = false
+        menu[1].isVisible = true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+
+            R.id.delete_crime -> {
+                crimeDetailViewModel.crime.value?.let { deleteCrime(it) }
+                true
+            }
+
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+
+    private fun deleteCrime(crime: Crime) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            crimeDetailViewModel.deleteCrime(crime)
+            findNavController().popBackStack()
         }
     }
 }

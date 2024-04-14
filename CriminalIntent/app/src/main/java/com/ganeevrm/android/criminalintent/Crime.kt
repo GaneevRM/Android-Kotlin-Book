@@ -12,5 +12,6 @@ data class Crime(
     var date: Date = Date(),
     var isSolved: Boolean = false,
     var requiresPolice: Int = 0,
-    val suspect: String = ""
+    val suspect: String = "",
+    val phoneNumber: String = ""
 )

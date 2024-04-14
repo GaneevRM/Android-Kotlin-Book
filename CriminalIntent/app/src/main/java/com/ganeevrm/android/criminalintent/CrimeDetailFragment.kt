@@ -1,5 +1,6 @@
 package com.ganeevrm.android.criminalintent
 
+import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
@@ -15,6 +16,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.core.view.get
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
@@ -33,9 +35,9 @@ import java.util.Date
 import java.util.Locale
 
 private const val DATE_FORMAT = "EEE, MMM, dd"
+private const val REQUEST_READ_CONTACTS = 1
 
 class CrimeDetailFragment : Fragment() {
-
     private val args: CrimeDetailFragmentArgs by navArgs()
     private var _binding: FragmentCrimeBinding? = null
     private val binding
@@ -64,6 +66,7 @@ class CrimeDetailFragment : Fragment() {
         }
         callback.isEnabled = true
         setHasOptionsMenu(true)
+        checkReadContactsPermission()
     }
 
     override fun onCreateView(
@@ -119,6 +122,34 @@ class CrimeDetailFragment : Fragment() {
         _binding = null
     }
 
+    private fun checkReadContactsPermission() {
+        if (ContextCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.READ_CONTACTS
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            requestPermissions(arrayOf(Manifest.permission.READ_CONTACTS), REQUEST_READ_CONTACTS)
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        when (requestCode) {
+            REQUEST_READ_CONTACTS -> {
+                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                    Toast.makeText(context, "Permission granted", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(context, "Permission denied", Toast.LENGTH_SHORT).show()
+                    findNavController().popBackStack()
+                }
+                return
+            }
+        }
+    }
+
     private fun updateUi(crime: Crime) {
         binding.apply {
             if (crimeTitle.text.toString() != crime.title) {
@@ -145,6 +176,14 @@ class CrimeDetailFragment : Fragment() {
             }
             crimeSuspect.text = crime.suspect.ifEmpty {
                 getString(R.string.crime_suspect_text)
+            }
+            callSuspect.visibility =
+                if (crime.phoneNumber.isEmpty()) View.INVISIBLE else View.VISIBLE
+            callSuspect.setOnClickListener {
+                val intent = Intent(Intent.ACTION_DIAL).apply {
+                    data = Uri.parse("tel:${crime.phoneNumber}")
+                }
+                startActivity(intent)
             }
         }
     }
@@ -194,14 +233,37 @@ class CrimeDetailFragment : Fragment() {
     }
 
     private fun parseContactSelection(contactUri: Uri) {
-        val queryFields = arrayOf(ContactsContract.Contacts.DISPLAY_NAME)
+        val queryFields =
+            arrayOf(ContactsContract.Contacts._ID, ContactsContract.Contacts.DISPLAY_NAME)
         val queryCursor =
             requireActivity().contentResolver.query(contactUri, queryFields, null, null, null)
+        var idSuspectPhone = ""
         queryCursor?.use { cursor ->
             if (cursor.moveToFirst()) {
-                val suspect = cursor.getString(0)
+                val suspect = cursor.getString(1)
                 crimeDetailViewModel.updateCrime { oldCrime ->
                     oldCrime.copy(suspect = suspect)
+                }
+                idSuspectPhone = cursor.getString(0)
+            }
+        }
+
+        val cursorPhone = requireActivity().contentResolver.query(
+            ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+            null,
+            ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?",
+            arrayOf(idSuspectPhone),
+            null
+        )
+        cursorPhone?.use { cursor ->
+            if (cursor.moveToFirst()) {
+                val columnIndexNumber =
+                    cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)
+                if (columnIndexNumber != -1) {
+                    val phoneNumber: String = cursor.getString(columnIndexNumber)
+                    crimeDetailViewModel.updateCrime { oldCrime ->
+                        oldCrime.copy(phoneNumber = phoneNumber)
+                    }
                 }
             }
         }

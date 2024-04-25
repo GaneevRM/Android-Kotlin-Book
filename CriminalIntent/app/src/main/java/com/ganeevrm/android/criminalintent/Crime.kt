@@ -13,5 +13,6 @@ data class Crime(
     var isSolved: Boolean = false,
     var requiresPolice: Int = 0,
     val suspect: String = "",
-    val phoneNumber: String = ""
+    val phoneNumber: String = "",
+    val photoFileName: String? = null
 )

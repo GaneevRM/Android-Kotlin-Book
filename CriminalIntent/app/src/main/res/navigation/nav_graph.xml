@@ -28,6 +28,9 @@
         <action
             android:id="@+id/select_time"
             app:destination="@id/timePickerFragment" />
+        <action
+            android:id="@+id/select_image"
+            app:destination="@id/imagePickerFragment" />
     </fragment>
     <dialog
         android:id="@+id/datePickerFragment"
@@ -44,5 +47,14 @@
         <argument
             android:name="crimeDate"
             app:argType="java.util.Date" />
+    </dialog>
+    <dialog
+        android:id="@+id/imagePickerFragment"
+        android:name="com.ganeevrm.android.criminalintent.dialog.ImagePickerFragment"
+        android:label="ImagePickerFragment" >
+        <argument
+            android:name="photoFileName"
+            app:argType="string"
+            app:nullable="true" />
     </dialog>
 </navigation>

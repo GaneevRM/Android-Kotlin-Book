@@ -1,7 +1,6 @@
 package com.ganeevrm.android.criminalintent
 
 import android.os.Bundle
-import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -20,7 +19,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.ganeevrm.android.criminalintent.databinding.FragmentCrimeListBinding
 import com.ganeevrm.android.criminalintent.databinding.ListItemCrimeBinding
 import kotlinx.coroutines.launch
+import java.text.DateFormat
 import java.util.Date
+import java.util.Locale
 import java.util.UUID
 
 
@@ -122,7 +123,7 @@ class CrimeListFragment : Fragment() {
 
         fun bind(crime: Crime, onCrimeClicked: (crimeId: UUID) -> Unit) {
             binding.crimeTitle.text = crime.title
-            binding.crimeDate.text = DateFormat.format("EEE, MMM, dd, yyyy", crime.date)
+            binding.crimeDate.text = DateFormat.getDateInstance(DateFormat.SHORT, Locale.getDefault()).format(crime.date)
             binding.crimeSolved.visibility = if (crime.isSolved) {
                 View.VISIBLE
             } else {

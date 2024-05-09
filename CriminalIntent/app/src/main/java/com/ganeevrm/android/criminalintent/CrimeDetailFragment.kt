@@ -35,6 +35,7 @@ import com.ganeevrm.android.criminalintent.dialog.DatePickerFragment
 import com.ganeevrm.android.criminalintent.utils.PictureUtils.Companion.getScaledBitmap
 import kotlinx.coroutines.launch
 import java.io.File
+import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -183,7 +184,7 @@ class CrimeDetailFragment : Fragment() {
             if (crimeTitle.text.toString() != crime.title) {
                 crimeTitle.setText(crime.title)
             }
-            crimeDate.text = crime.date.toString()
+            crimeDate.text = DateFormat.getDateInstance(DateFormat.SHORT, Locale.getDefault()).format(crime.date)
             crimeDate.setOnClickListener {
                 findNavController().navigate(CrimeDetailFragmentDirections.selectDate(crime.date))
             }

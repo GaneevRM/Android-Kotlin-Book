@@ -4,7 +4,12 @@
     <string name="crime_title_hint">Introduzca un título para el crimen.</string>
     <string name="crime_title_label">Título</string>
     <string name="crime_details_label">Detalles</string>
+    <string name="crime_date_label">Fecha</string>
     <string name="crime_solved_label">Solucionado</string>
+    <string name="crime_photo_button_description">Tomar foto de la escena del crimen</string>
+    <string name="crime_photo_no_image_description">Foto de la escena del crimen (no establecida)</string>
+    <string name="crime_photo_image_description">Foto de la escena del crimen (establecida)</string>
+    <string name="crime_list_image_solved">El crimen está resuelto</string>
     <string name="new_crime">Crimen Nuevo</string>
     <string name="crime_suspect_text">Elegir Sospechoso</string>
     <string name="crime_report_text">Enviar el Informe del Crimen</string>

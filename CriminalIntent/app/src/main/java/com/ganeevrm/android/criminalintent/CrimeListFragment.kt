@@ -122,6 +122,15 @@ class CrimeListFragment : Fragment() {
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(crime: Crime, onCrimeClicked: (crimeId: UUID) -> Unit) {
+            var contentDescription = ""
+            contentDescription += if(crime.isSolved){
+                "Crime is solved"
+            } else {
+                "Crime is not solved"
+            }
+            contentDescription += " " + crime.title + " " + DateFormat.getDateInstance(DateFormat.SHORT, Locale.getDefault()).format(crime.date)
+
+            binding.root.contentDescription = contentDescription
             binding.crimeTitle.text = crime.title
             binding.crimeDate.text = DateFormat.getDateInstance(DateFormat.SHORT, Locale.getDefault()).format(crime.date)
             binding.crimeSolved.visibility = if (crime.isSolved) {

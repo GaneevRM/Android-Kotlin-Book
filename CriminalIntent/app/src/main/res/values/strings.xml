@@ -3,7 +3,12 @@
     <string name="crime_title_hint">Enter a title for the crime.</string>
     <string name="crime_title_label">Title</string>
     <string name="crime_details_label">Details</string>
+    <string name="crime_date_label">Date</string>
     <string name="crime_solved_label">Solved</string>
+    <string name="crime_photo_button_description">Take photo of crime scene</string>
+    <string name="crime_photo_image_description">Crime scene photo (set)</string>
+    <string name="crime_photo_no_image_description">Crime scene photo (not set)</string>
+    <string name="crime_list_image_solved">Crime is solved</string>
     <string name="new_crime">New Crime</string>
     <string name="delete_crime">Delete Crime</string>
     <string name="info_title_label">List is empty</string>

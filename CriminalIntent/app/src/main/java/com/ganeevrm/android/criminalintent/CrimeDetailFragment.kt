@@ -184,7 +184,8 @@ class CrimeDetailFragment : Fragment() {
             if (crimeTitle.text.toString() != crime.title) {
                 crimeTitle.setText(crime.title)
             }
-            crimeDate.text = DateFormat.getDateInstance(DateFormat.SHORT, Locale.getDefault()).format(crime.date)
+            crimeDate.text =
+                DateFormat.getDateInstance(DateFormat.SHORT, Locale.getDefault()).format(crime.date)
             crimeDate.setOnClickListener {
                 findNavController().navigate(CrimeDetailFragmentDirections.selectDate(crime.date))
             }
@@ -315,21 +316,49 @@ class CrimeDetailFragment : Fragment() {
     }
 
     private fun updatePhoto(photoFileName: String?) {
-        if (binding.crimePhoto.tag != photoFileName) {
-            val photoFile = photoFileName.let {
-                File(requireContext().applicationContext.filesDir, it)
-            }
-            if (photoFile?.exists() == true) {
-                binding.crimePhoto.doOnLayout { measuredView ->
-                    val scaledBitmap =
-                        getScaledBitmap(photoFile.path, measuredView.width, measuredView.height)
-                    binding.crimePhoto.setImageBitmap(scaledBitmap)
-                    binding.crimePhoto.tag = photoFileName
+        if (photoFileName == null) {
+            photoIsEmpty()
+        } else {
+            if (binding.crimePhoto.tag != photoFileName) {
+                val photoFile = photoFileName.let {
+                    File(requireContext().applicationContext.filesDir, it)
                 }
-            } else {
-                binding.crimePhoto.setImageBitmap(null)
-                binding.crimePhoto.tag = null
+                if (photoFile.exists()) {
+                    with(binding.crimePhoto) {
+                        doOnLayout { measuredView ->
+                            val scaledBitmap =
+                                getScaledBitmap(
+                                    photoFile.path,
+                                    measuredView.width,
+                                    measuredView.height
+                                )
+                            setImageBitmap(scaledBitmap)
+                            tag = photoFileName
+                            contentDescription =
+                                getString(R.string.crime_photo_image_description)
+                        }
+                        postDelayed(
+                            { announceForAccessibility("Photo is make") },
+                            1000
+                        )
+                    }
+                } else {
+                    photoIsEmpty()
+                }
             }
+        }
+    }
+
+    private fun photoIsEmpty() {
+        with(binding.crimePhoto) {
+            setImageBitmap(null)
+            tag = null
+            contentDescription =
+                getString(R.string.crime_photo_no_image_description)
+            postDelayed(
+                { announceForAccessibility("Photo is not make") },
+                1000
+            )
         }
     }
 }

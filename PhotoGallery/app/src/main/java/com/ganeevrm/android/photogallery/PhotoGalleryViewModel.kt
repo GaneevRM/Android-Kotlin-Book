@@ -7,12 +7,14 @@ import com.ganeevrm.android.photogallery.api.GalleryItem
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 private const val TAG = "PhotoGalleryViewModel"
 
 class PhotoGalleryViewModel : ViewModel() {
     private val photoRepository = PhotoRepository()
+    private val preferencesRepository = PreferencesRepository.get()
 
     private val _galleryIyems: MutableStateFlow<List<GalleryItem>> = MutableStateFlow(emptyList())
     val galleryItem: StateFlow<List<GalleryItem>>
@@ -20,17 +22,19 @@ class PhotoGalleryViewModel : ViewModel() {
 
     init {
         viewModelScope.launch {
-            try {
-                val items = fetchGalleryItems("planets")
-                _galleryIyems.value = items
-            } catch (ex: Exception) {
-                Log.e(TAG, "Failed to fetch gallery items", ex)
+            preferencesRepository.storedQuery.collectLatest { storedQuery ->
+                try {
+                    val items = fetchGalleryItems(storedQuery)
+                    _galleryIyems.value = items
+                } catch (ex: Exception) {
+                    Log.e(TAG, "Failed to fetch gallery items", ex)
+                }
             }
         }
     }
 
     fun setQuery(query: String){
-        viewModelScope.launch { _galleryIyems.value = fetchGalleryItems(query) }
+        viewModelScope.launch { preferencesRepository.setStoredQuery(query) }
     }
 
     private suspend fun fetchGalleryItems(query: String): List<GalleryItem>{

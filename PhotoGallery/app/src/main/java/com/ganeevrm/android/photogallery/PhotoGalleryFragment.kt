@@ -17,12 +17,14 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.GridLayoutManager
+import com.ganeevrm.android.photogallery.api.GalleryItem
 import com.ganeevrm.android.photogallery.databinding.FragmentPhotoGalleryBinding
 import kotlinx.coroutines.launch
 
 private const val TAG = "PhotoGalleryFragment"
 
 class PhotoGalleryFragment : Fragment() {
+    private var searchView: SearchView? = null
     private var _binding: FragmentPhotoGalleryBinding? = null
     private val binding
         get() = checkNotNull(_binding) {
@@ -50,9 +52,9 @@ class PhotoGalleryFragment : Fragment() {
                 menuInflater.inflate(R.menu.fragment_photo_gallery, menu)
 
                 val searchItem: MenuItem = menu.findItem(R.id.menu_item_search)
-                val searchView = searchItem.actionView as? SearchView
+                searchView = searchItem.actionView as? SearchView
 
-                searchView?.setOnQueryTextListener(object: SearchView.OnQueryTextListener {
+                searchView?.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
                     override fun onQueryTextSubmit(query: String?): Boolean {
                         Log.d(TAG, "QueryTextSubmit: $query")
                         photoGalleryViewModel.setQuery(query ?: "")
@@ -72,10 +74,12 @@ class PhotoGalleryFragment : Fragment() {
                     R.id.menu_item_search -> {
                         true
                     }
+
                     R.id.menu_item_clear -> {
                         photoGalleryViewModel.setQuery("")
                         true
                     }
+
                     else -> false
                 }
             }
@@ -84,8 +88,9 @@ class PhotoGalleryFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                photoGalleryViewModel.galleryItem.collect { items ->
-                    binding.photoGrid.adapter = PhotoListAdapter(items)
+                photoGalleryViewModel.uiState.collect { state ->
+                    binding.photoGrid.adapter = PhotoListAdapter(state.images)
+                    searchView?.setQuery(state.query, false)
                 }
             }
         }
@@ -94,5 +99,9 @@ class PhotoGalleryFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+        searchView = null
     }
+
 }
+
+data class PhotoGalleryUiState(val images: List<GalleryItem> = listOf(), val query: String = "")

@@ -17,7 +17,8 @@ class PhotoGalleryViewModel : ViewModel() {
     private val photoRepository = PhotoRepository()
     private val preferencesRepository = PreferencesRepository.get()
 
-    private val _uiState: MutableStateFlow<PhotoGalleryUiState> = MutableStateFlow(PhotoGalleryUiState())
+    private val _uiState: MutableStateFlow<PhotoGalleryUiState> =
+        MutableStateFlow(PhotoGalleryUiState())
     val uiState: StateFlow<PhotoGalleryUiState>
         get() = _uiState.asStateFlow()
 
@@ -37,14 +38,25 @@ class PhotoGalleryViewModel : ViewModel() {
                 }
             }
         }
+        viewModelScope.launch {
+            preferencesRepository.isPolling.collect { isPolling ->
+                _uiState.update { it.copy(isPolling = isPolling) }
+            }
+        }
     }
 
-    fun setQuery(query: String){
+    fun setQuery(query: String) {
         viewModelScope.launch { preferencesRepository.setStoredQuery(query) }
     }
 
-    private suspend fun fetchGalleryItems(query: String): List<GalleryItem>{
-        return if (query.isNotEmpty()){
+    fun toggleIsPolling(){
+        viewModelScope.launch {
+            preferencesRepository.setPolling(!uiState.value.isPolling)
+        }
+    }
+
+    private suspend fun fetchGalleryItems(query: String): List<GalleryItem> {
+        return if (query.isNotEmpty()) {
             photoRepository.searchPhotos(query)
         } else {
             photoRepository.fetchPhotos()

@@ -1,5 +1,8 @@
 package com.ganeevrm.android.photogallery
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -8,7 +11,11 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SearchView
+import androidx.core.content.ContextCompat
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
@@ -18,18 +25,22 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.work.Constraints
+import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.NetworkType
-import androidx.work.OneTimeWorkRequest
+import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.ganeevrm.android.photogallery.api.GalleryItem
 import com.ganeevrm.android.photogallery.databinding.FragmentPhotoGalleryBinding
 import kotlinx.coroutines.launch
+import java.util.concurrent.TimeUnit
 
 private const val TAG = "PhotoGalleryFragment"
+private const val POLL_WORK = "POLL_WORK"
 
 class PhotoGalleryFragment : Fragment() {
     private var searchView: SearchView? = null
     private var _binding: FragmentPhotoGalleryBinding? = null
+    private var pollingMenuItem: MenuItem? = null
     private val binding
         get() = checkNotNull(_binding) {
             "Cannot access binding because it is null. Is the view visible?"
@@ -37,14 +48,54 @@ class PhotoGalleryFragment : Fragment() {
 
     private val photoGalleryViewModel: PhotoGalleryViewModel by viewModels()
 
+    private val requestPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+            if (isGranted) {
+                showToast(resources.getString(R.string.permission_been_granted))
+            } else {
+                showToast(resources.getString(R.string.permission_is_denied))
+            }
+        }
+
+    private fun checkNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            when {
+                ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.POST_NOTIFICATIONS) ==
+                        PackageManager.PERMISSION_GRANTED -> {
+                    showToast(resources.getString(R.string.permission_already_been_granted))
+                }
+                shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS) -> {
+                    showPermissionRationaleDialog()
+                }
+                else -> {
+                    requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                }
+            }
+        } else {
+            showToast(resources.getString(R.string.permission_is_not_required))
+        }
+    }
+
+    private fun showPermissionRationaleDialog() {
+        AlertDialog.Builder(requireContext())
+            .setTitle(resources.getString(R.string.dialog_title_permission))
+            .setMessage(resources.getString(R.string.dialog_message_permission))
+            .setPositiveButton(resources.getString(R.string.dialog_positive_button)) { _, _ ->
+                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+            .setNegativeButton(resources.getString(R.string.dialog_negative_button), null)
+            .show()
+    }
+
+    private fun showToast(message: String) {
+        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+    }
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val constraints =
-            Constraints.Builder().setRequiredNetworkType(NetworkType.UNMETERED).build()
-        val workRequest =
-            OneTimeWorkRequest.Builder(PollWorker::class.java).setConstraints(constraints).build()
-        WorkManager.getInstance(requireContext()).enqueue(workRequest)
+        checkNotificationPermission()
     }
 
     override fun onCreateView(
@@ -67,6 +118,7 @@ class PhotoGalleryFragment : Fragment() {
 
                 val searchItem: MenuItem = menu.findItem(R.id.menu_item_search)
                 searchView = searchItem.actionView as? SearchView
+                pollingMenuItem = menu.findItem(R.id.menu_item_toggle_polling)
 
                 searchView?.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
                     override fun onQueryTextSubmit(query: String?): Boolean {
@@ -94,6 +146,11 @@ class PhotoGalleryFragment : Fragment() {
                         true
                     }
 
+                    R.id.menu_item_toggle_polling -> {
+                        photoGalleryViewModel.toggleIsPolling()
+                        true
+                    }
+
                     else -> false
                 }
             }
@@ -105,6 +162,7 @@ class PhotoGalleryFragment : Fragment() {
                 photoGalleryViewModel.uiState.collect { state ->
                     binding.photoGrid.adapter = PhotoListAdapter(state.images)
                     searchView?.setQuery(state.query, false)
+                    updatePollingState(state.isPolling)
                 }
             }
         }
@@ -114,8 +172,30 @@ class PhotoGalleryFragment : Fragment() {
         super.onDestroyView()
         _binding = null
         searchView = null
+        pollingMenuItem = null
+    }
+
+    private fun updatePollingState(isPolling: Boolean){
+        val toggleItemTitle = if (isPolling) {
+            R.string.stop_polling
+        } else {
+            R.string.start_polling
+        }
+        pollingMenuItem?.setTitle(toggleItemTitle)
+
+        if(isPolling){
+            val constraints =
+                Constraints.Builder().setRequiredNetworkType(NetworkType.UNMETERED).build()
+            val periodicRequest = PeriodicWorkRequestBuilder<PollWorker>(15, TimeUnit.MINUTES)
+                .setConstraints(constraints)
+                .build()
+            WorkManager.getInstance(requireContext()).enqueueUniquePeriodicWork(POLL_WORK, ExistingPeriodicWorkPolicy.KEEP, periodicRequest)
+        } else {
+            WorkManager.getInstance(requireContext()).cancelUniqueWork(POLL_WORK)
+        }
+
     }
 
 }
 
-data class PhotoGalleryUiState(val images: List<GalleryItem> = listOf(), val query: String = "")
+data class PhotoGalleryUiState(val images: List<GalleryItem> = listOf(), val query: String = "", val isPolling: Boolean = false)

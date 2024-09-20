@@ -1,6 +1,7 @@
 package com.ganeevrm.android.photogallery
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -60,13 +61,18 @@ class PhotoGalleryFragment : Fragment() {
     private fun checkNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             when {
-                ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.POST_NOTIFICATIONS) ==
+                ContextCompat.checkSelfPermission(
+                    requireContext(),
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) ==
                         PackageManager.PERMISSION_GRANTED -> {
                     showToast(resources.getString(R.string.permission_already_been_granted))
                 }
+
                 shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS) -> {
                     showPermissionRationaleDialog()
                 }
+
                 else -> {
                     requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                 }
@@ -160,7 +166,10 @@ class PhotoGalleryFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 photoGalleryViewModel.uiState.collect { state ->
-                    binding.photoGrid.adapter = PhotoListAdapter(state.images)
+                    binding.photoGrid.adapter = PhotoListAdapter(state.images) { photoPageUri ->
+                        val intent = Intent(Intent.ACTION_VIEW, photoPageUri)
+                        startActivity(intent)
+                    }
                     searchView?.setQuery(state.query, false)
                     updatePollingState(state.isPolling)
                 }
@@ -175,7 +184,7 @@ class PhotoGalleryFragment : Fragment() {
         pollingMenuItem = null
     }
 
-    private fun updatePollingState(isPolling: Boolean){
+    private fun updatePollingState(isPolling: Boolean) {
         val toggleItemTitle = if (isPolling) {
             R.string.stop_polling
         } else {
@@ -183,13 +192,17 @@ class PhotoGalleryFragment : Fragment() {
         }
         pollingMenuItem?.setTitle(toggleItemTitle)
 
-        if(isPolling){
+        if (isPolling) {
             val constraints =
                 Constraints.Builder().setRequiredNetworkType(NetworkType.UNMETERED).build()
             val periodicRequest = PeriodicWorkRequestBuilder<PollWorker>(15, TimeUnit.MINUTES)
                 .setConstraints(constraints)
                 .build()
-            WorkManager.getInstance(requireContext()).enqueueUniquePeriodicWork(POLL_WORK, ExistingPeriodicWorkPolicy.KEEP, periodicRequest)
+            WorkManager.getInstance(requireContext()).enqueueUniquePeriodicWork(
+                POLL_WORK,
+                ExistingPeriodicWorkPolicy.KEEP,
+                periodicRequest
+            )
         } else {
             WorkManager.getInstance(requireContext()).cancelUniqueWork(POLL_WORK)
         }
@@ -198,4 +211,8 @@ class PhotoGalleryFragment : Fragment() {
 
 }
 
-data class PhotoGalleryUiState(val images: List<GalleryItem> = listOf(), val query: String = "", val isPolling: Boolean = false)
+data class PhotoGalleryUiState(
+    val images: List<GalleryItem> = listOf(),
+    val query: String = "",
+    val isPolling: Boolean = false
+)

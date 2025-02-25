@@ -5,8 +5,10 @@ import okhttp3.HttpUrl
 import okhttp3.Interceptor
 import okhttp3.Request
 import okhttp3.Response
+import com.ganeevrm.android.photogallery.BuildConfig
 
-private const val API_KEY = "dbdfa900fc37ebec90be16931800f971"
+
+private const val API_KEY = BuildConfig.API_KEY
 class PhotoInterceptor : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         val originalRequest = chain.request()

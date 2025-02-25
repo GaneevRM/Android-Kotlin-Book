@@ -131,6 +131,7 @@ class PhotoGalleryFragment : Fragment() {
                     override fun onQueryTextSubmit(query: String?): Boolean {
                         Log.d(TAG, "QueryTextSubmit: $query")
                         photoGalleryViewModel.setQuery(query ?: "")
+                        searchView?.clearFocus()
                         return true
                     }
 
@@ -172,6 +173,8 @@ class PhotoGalleryFragment : Fragment() {
                     }
                     searchView?.setQuery(state.query, false)
                     updatePollingState(state.isPolling)
+                    binding.progressBar.visibility = if (state.isLoading) View.VISIBLE else View.GONE
+                    searchView?.visibility = if (state.isLoading) View.GONE else View.VISIBLE
                 }
             }
         }
@@ -214,5 +217,6 @@ class PhotoGalleryFragment : Fragment() {
 data class PhotoGalleryUiState(
     val images: List<GalleryItem> = listOf(),
     val query: String = "",
-    val isPolling: Boolean = false
+    val isPolling: Boolean = false,
+    val isLoading: Boolean = false
 )

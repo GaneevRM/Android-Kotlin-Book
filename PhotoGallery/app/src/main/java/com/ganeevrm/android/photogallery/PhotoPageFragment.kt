@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.navArgs
@@ -15,6 +16,7 @@ import com.ganeevrm.android.photogallery.databinding.FragmentPhotoPageBinding
 
 class PhotoPageFragment : Fragment() {
     private val args: PhotoPageFragmentArgs by navArgs()
+    private lateinit var webView: WebView
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreateView(
@@ -23,6 +25,7 @@ class PhotoPageFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         val binding = FragmentPhotoPageBinding.inflate(inflater, container, false)
+        webView = binding.webView
         binding.apply {
             webView.apply {
                 settings.javaScriptEnabled = true
@@ -47,5 +50,23 @@ class PhotoPageFragment : Fragment() {
             }
         }
         return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        val callback: OnBackPressedCallback =
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    if (webView.canGoBack()) {
+                        webView.goBack()
+                    } else {
+                        isEnabled = false
+                    }
+                }
+            }
+        requireActivity().onBackPressedDispatcher.addCallback(
+            viewLifecycleOwner, callback
+        )
     }
 }

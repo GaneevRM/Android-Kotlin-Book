@@ -46,7 +46,10 @@ class PhotoGalleryViewModel : ViewModel() {
     }
 
     fun setQuery(query: String) {
-        viewModelScope.launch { preferencesRepository.setStoredQuery(query) }
+        _uiState.update { it.copy(isLoading = true) }
+        viewModelScope.launch {
+            preferencesRepository.setStoredQuery(query)
+        }
     }
 
     fun toggleIsPolling(){
@@ -56,10 +59,16 @@ class PhotoGalleryViewModel : ViewModel() {
     }
 
     private suspend fun fetchGalleryItems(query: String): List<GalleryItem> {
-        return if (query.isNotEmpty()) {
-            photoRepository.searchPhotos(query)
-        } else {
-            photoRepository.fetchPhotos()
+        return try {
+            _uiState.update { it.copy(isLoading = true) }
+            val items = if (query.isNotEmpty()) {
+                photoRepository.searchPhotos(query)
+            } else {
+                photoRepository.fetchPhotos()
+            }
+            items
+        } finally {
+            _uiState.update { it.copy(isLoading = false) }
         }
     }
 }

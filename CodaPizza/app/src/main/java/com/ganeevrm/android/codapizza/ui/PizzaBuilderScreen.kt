@@ -1,12 +1,15 @@
 package com.ganeevrm.android.codapizza.ui
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Button
+import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
+import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -14,6 +17,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.toUpperCase
@@ -30,29 +34,40 @@ fun PizzaBuilderScreen(modifier: Modifier = Modifier) {
     var pizza by rememberSaveable {
         mutableStateOf(Pizza())
     }
-    Column(modifier = modifier) {
-        SizeDropdownMenu(
-            pizza = pizza,
-            onEditPizza = { pizza = it },
-            modifierButton = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        )
+    var rotatePizza by remember { mutableStateOf(false) }
 
-        ToppingList(
-            pizza = pizza,
-            onEditPizza = { pizza = it },
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f, fill = true)
+    Scaffold(modifier = modifier, topBar = {
+        TopAppBar(
+            title = { Text(stringResource(R.string.app_name)) }
         )
+    }) { paddingValues ->
+        Column(modifier = Modifier.padding(paddingValues)) {
 
-        OrderButton(
-            pizza = pizza,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        )
+            SizeDropdownMenu(
+                pizza = pizza,
+                onEditPizza = { pizza = it },
+                modifierButton = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            )
+
+            ToppingList(
+                pizza = pizza,
+                onEditPizza = { pizza = it },
+                rotateTrigger = rotatePizza,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f, fill = true)
+            )
+
+            OrderButton(
+                pizza = pizza,
+                onOrderClick = { rotatePizza = !rotatePizza },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            )
+        }
     }
 }
 
@@ -60,6 +75,7 @@ fun PizzaBuilderScreen(modifier: Modifier = Modifier) {
 private fun ToppingList(
     pizza: Pizza,
     onEditPizza: (Pizza) -> Unit,
+    rotateTrigger: Boolean,
     modifier: Modifier = Modifier
 ) {
 
@@ -79,7 +95,16 @@ private fun ToppingList(
     }
 
     LazyColumn(modifier = modifier) {
-        items(Topping.values()) { topping ->
+        item {
+            PizzaHeroImage(
+                pizza = pizza,
+                rotateTrigger = rotateTrigger,
+                modifier = Modifier
+                    .padding(16.dp)
+            )
+        }
+
+        items(Topping.entries.toTypedArray()) { topping ->
             ToppingCell(
                 topping = topping,
                 placement = pizza.toppings[topping],
@@ -91,8 +116,13 @@ private fun ToppingList(
 }
 
 @Composable
-private fun OrderButton(pizza: Pizza, modifier: Modifier = Modifier) {
-    Button(modifier = modifier, onClick = { /*TODO*/ }) {
+private fun OrderButton(pizza: Pizza, onOrderClick: () -> Unit, modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    Button(modifier = modifier, onClick = {
+        onOrderClick()
+        Toast.makeText(context, R.string.order_placed_toast, Toast.LENGTH_LONG)
+            .show()
+    }) {
         val currencyFormatter = remember {
             NumberFormat.getCurrencyInstance()
         }

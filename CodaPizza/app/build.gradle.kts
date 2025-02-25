@@ -45,9 +45,6 @@ android {
 dependencies {
 
     implementation("androidx.core:core-ktx:1.15.0")
-    implementation("androidx.appcompat:appcompat:1.7.0")
-    implementation("com.google.android.material:material:1.12.0")
-    implementation("androidx.constraintlayout:constraintlayout:2.2.0")
 
     implementation("androidx.compose.foundation:foundation:1.7.5")
     implementation("androidx.compose.runtime:runtime:1.7.5")

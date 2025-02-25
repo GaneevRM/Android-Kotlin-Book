@@ -22,7 +22,6 @@ import androidx.compose.ui.unit.dp
 import com.ganeevrm.android.codapizza.R
 import com.ganeevrm.android.codapizza.model.Pizza
 import com.ganeevrm.android.codapizza.model.Topping
-import com.ganeevrm.android.codapizza.model.ToppingPlacement
 import java.text.NumberFormat
 
 @Preview
@@ -32,6 +31,14 @@ fun PizzaBuilderScreen(modifier: Modifier = Modifier) {
         mutableStateOf(Pizza())
     }
     Column(modifier = modifier) {
+        SizeDropdownMenu(
+            pizza = pizza,
+            onEditPizza = { pizza = it },
+            modifierButton = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        )
+
         ToppingList(
             pizza = pizza,
             onEditPizza = { pizza = it },
@@ -50,20 +57,34 @@ fun PizzaBuilderScreen(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun ToppingList(pizza: Pizza, onEditPizza: (Pizza) -> Unit, modifier: Modifier = Modifier) {
+private fun ToppingList(
+    pizza: Pizza,
+    onEditPizza: (Pizza) -> Unit,
+    modifier: Modifier = Modifier
+) {
+
+    var toppingBeingAdded by rememberSaveable { mutableStateOf<Topping?>(null) }
+
+    toppingBeingAdded?.let { topping ->
+        ToppingPlacementDialog(
+            topping = topping,
+            onSetToppingPlacement = { placement ->
+                onEditPizza(pizza.withTopping(topping, placement))
+                topping.toppingName
+            },
+            onDismissRequest = {
+                toppingBeingAdded = null
+            }
+        )
+    }
+
     LazyColumn(modifier = modifier) {
         items(Topping.values()) { topping ->
             ToppingCell(
                 topping = topping,
                 placement = pizza.toppings[topping],
                 onClickTopping = {
-                    val isOnPizza = pizza.toppings[topping] != null
-                    onEditPizza(
-                        pizza.withTopping(
-                            topping = topping,
-                            placement = if (isOnPizza) null else ToppingPlacement.All
-                        )
-                    )
+                    toppingBeingAdded = topping
                 })
         }
     }

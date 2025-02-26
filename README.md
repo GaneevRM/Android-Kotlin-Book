@@ -5,17 +5,35 @@ ___
 Projects from the book "Android Programming: The Big Nerd Ranch Guide (5th Edition)". Each project contains completed tasks that are found at the end of chapters.
 Also, my code may differ from the code from the book in some points, because some libraries, frameworks, approaches may have changed/updated since the book was published.
 ___
-## с
+## Screenshots
 
-![GeoQuiz](https://github.com/GaneevRM/Android-Kotlin-Book/blob/main/Other/GeoQuiz.gif)
+<div align="center">
+  <img src="https://github.com/GaneevRM/Android-Kotlin-Book/blob/main/Other/GeoQuiz.gif" alt="GeoQuiz">
+  <p>GeoQuiz</p>
+</div>
 ___
-![CriminalIntent](https://github.com/GaneevRM/Android-Kotlin-Book/blob/main/Other/CriminalIntent.gif)
+<div align="center">
+  <img src="https://github.com/GaneevRM/Android-Kotlin-Book/blob/main/Other/CriminalIntent.gif" alt="CriminalIntent">
+  <p>CriminalIntent</p>
+</div>
 ___
-![PhotoGallery](https://github.com/GaneevRM/Android-Kotlin-Book/blob/main/Other/PhotoGallery.gif)
+<div align="center">
+  <img src="https://github.com/GaneevRM/Android-Kotlin-Book/blob/main/Other/PhotoGallery.gif" alt="PhotoGallery">
+  <p>PhotoGallery</p>
+</div>
 ___
-![DragAndDraw](https://github.com/GaneevRM/Android-Kotlin-Book/blob/main/Other/DragAndDraw.gif)
+<div align="center">
+  <img src="https://github.com/GaneevRM/Android-Kotlin-Book/blob/main/Other/DragAndDraw.gif" alt="DragAndDraw">
+  <p>DragAndDraw</p>
+</div>
 ___
-![Sunset](https://github.com/GaneevRM/Android-Kotlin-Book/blob/main/Other/Sunset.gif)
+<div align="center">
+  <img src="https://github.com/GaneevRM/Android-Kotlin-Book/blob/main/Other/Sunset.gif" alt="Sunset">
+  <p>Sunset</p>
+</div>
 ___
-![CodaPizza](https://github.com/GaneevRM/Android-Kotlin-Book/blob/main/Other/CodaPizza.gif)
+<div align="center">
+  <img src="https://github.com/GaneevRM/Android-Kotlin-Book/blob/main/Other/CodaPizza.gif" alt="CodaPizza">
+  <p>CodaPizza</p>
+</div>
 ___

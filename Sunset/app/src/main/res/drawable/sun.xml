@@ -1,5 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?>
-<shape xmlns:android="http://schemas.android.com/apk/res/android"
-    android:shape="oval">
-    <solid android:color="@color/bright_sun" />
-</shape>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="100"
+    android:viewportHeight="100">
+    <path
+        android:fillColor="@color/bright_sun"
+        android:pathData="M 50 0 L 95 25 L 95 75 L 50 100 L 5 75 L 5 25 L 50 0 Z" />
+</vector>

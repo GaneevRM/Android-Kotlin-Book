@@ -80,7 +80,7 @@ proguard/
 *.ipr
 *~
 *.swp
-/*/gradle.properties
+gradle.properties
 
 # Keystore files
 

@@ -19,6 +19,7 @@ import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
+import androidx.core.view.isEmpty
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -121,7 +122,7 @@ class PhotoGalleryFragment : Fragment() {
 
         menuHost.addMenuProvider(object : MenuProvider {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-                menuInflater.inflate(R.menu.fragment_photo_gallery, menu)
+                if(menu.isEmpty()) menuInflater.inflate(R.menu.fragment_photo_gallery, menu)
 
                 val searchItem: MenuItem = menu.findItem(R.id.menu_item_search)
                 searchView = searchItem.actionView as? SearchView
@@ -169,6 +170,7 @@ class PhotoGalleryFragment : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 photoGalleryViewModel.uiState.collect { state ->
                     binding.photoGrid.adapter = PhotoListAdapter(state.images) { photoPageUri ->
+                        searchView?.visibility = View.GONE
                         findNavController().navigate(PhotoGalleryFragmentDirections.showPhoto(photoPageUri))
                     }
                     searchView?.setQuery(state.query, false)

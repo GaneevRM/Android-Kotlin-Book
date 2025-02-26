@@ -69,4 +69,10 @@ class PhotoPageFragment : Fragment() {
             viewLifecycleOwner, callback
         )
     }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        val parent = requireActivity() as AppCompatActivity
+        parent.supportActionBar?.subtitle = null
+    }
 }
